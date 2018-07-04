@@ -10,9 +10,17 @@
   
   firebase.initializeApp(config);
 
-var database = firebase.database();  
+var database = firebase.database();
 
-//Create button for adding new train
+//Clear button for Add Train form fields
+$("#clear-train-btn").on("click", function(event) {
+    $("#train-name").val("");
+    $("#destination").val("");
+    $("#first-train-time").val("");
+    $("#frequency").val("");
+});  
+
+//Add button for submitting new train data
 $("#add-train-btn").on("click", function(event) {
 
   event.preventDefault();
@@ -25,57 +33,67 @@ $("#add-train-btn").on("click", function(event) {
 
   // Add validation code using if and else if
 
-
-
-  // First Time (pushed back 1 year to make sure it comes before current time)
-  var firstTrainTimeBefore = moment(firstTrainTime, "HH:mm").subtract(1, "years");    
-
-  // Current Time
-  var currentTime = moment().format("HH:mm A");
+  if (trainName === "" || destination === "" || firstTrainTime === "" || frequency ==="") {
+    $("#feedback").html("<p>Please enter values in all form fields</p>");
     
-  // Difference between the times
-  var timeDiff = moment().diff(moment(firstTrainTimeBefore), "minutes");
+    return false;
 
-  // Time apart (remainder)
-  var remainder = timeDiff % frequency;
+  } else if (firstTrainTime.length !== 5 || firstTrainTime.substring(2,3)!== ":") {
+    $("#feedback").html("<p>Please enter the First Train Time in military time format</p>");
 
-  // Minute Until Train
-  var minsAway = frequency - remainder;
+    return false;
 
-  // Next Train
-  var nextTrain = moment().add(minsAway, "minutes").format("HH:mm A");
+  } else {
 
-  // Creates local "temporary" object for holding train data
-  var newTrain = {
-    trainName: trainName,
-    destination: destination,
-    firstTrainTime: firstTrainTime,
-    frequency: frequency,
-    nextTrain: nextTrain,
-    minsAway: minsAway,
-    currentTime: currentTime
-  };
+    // First Time (pushed back 1 year to make sure it comes before current time)
+    var firstTrainTimeBefore = moment(firstTrainTime, "HH:mm").subtract(1, "years");    
 
-  // Uploads train data to the database
-  database.ref().push(newTrain);
+    // Current Time
+    var currentTime = moment().format("HH:mm A");
+      
+    // Difference between the times
+    var timeDiff = moment().diff(moment(firstTrainTimeBefore), "minutes");
 
-  // Logs everything to console
-  console.log(newTrain.trainName);
-  console.log(newTrain.destination);
-  console.log(newTrain.firstTrainTime);
-  console.log(newTrain.frequency);
-  console.log(newTrain.nextTrain);
-  console.log(newTrain.minsAway);
-  console.log(newTrain.currentTime);
+    // Time apart (remainder)
+    var remainder = timeDiff % frequency;
 
-  alert("New train successfully added");
+    // Minute Until Train
+    var minsAway = frequency - remainder;
 
-  // Clears all of the text-boxes
-  $("#train-name").val("");
-  $("#destination").val("");
-  $("#first-train-time").val("");
-  $("#frequency").val("");
+    // Next Train
+    var nextTrain = moment().add(minsAway, "minutes").format("HH:mm A");
 
+    // Creates local "temporary" object for holding train data
+    var newTrain = {
+      trainName: trainName,
+      destination: destination,
+      firstTrainTime: firstTrainTime,
+      frequency: frequency,
+      nextTrain: nextTrain,
+      minsAway: minsAway,
+      currentTime: currentTime
+    };
+
+    // Uploads train data to the database
+    database.ref().push(newTrain);
+
+    // Logs everything to console
+    console.log(newTrain.trainName);
+    console.log(newTrain.destination);
+    console.log(newTrain.firstTrainTime);
+    console.log(newTrain.frequency);
+    console.log(newTrain.nextTrain);
+    console.log(newTrain.minsAway);
+    console.log(newTrain.currentTime);
+
+    alert("New train successfully added");
+
+    // Clears all of the text-boxes
+    $("#train-name").val("");
+    $("#destination").val("");
+    $("#first-train-time").val("");
+    $("#frequency").val("");
+  }
 
 });
 

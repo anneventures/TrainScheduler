@@ -1,0 +1,17 @@
+
+body, html {height: 100%;}
+
+body, h1, h2, h3 {font-family: 'Inconsolata', monospace;}
+
+input[type=text] {
+	margin-bottom: 4%;
+}
+
+.menu {display: none}
+
+.bgimg {
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url("../images/trainstation.jpg");
+    min-height: 90%;
+}

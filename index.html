@@ -4,28 +4,20 @@
 	<head>
 		<meta charset="utf-8"/>		
 			<link href="assets/css/reset.css" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
 			<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+      <link href="assets/css/style.css" rel="stylesheet">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<title>Anne Simon | Train Scheduler</title>
-<style>
-body, html {height: 100%}
-body,h1,h2,h3,h4,h5,h6 {font-family: "Amatic SC", sans-serif}
-.menu {display: none}
-.bgimg {
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-image: url("assets/images/trainstation.jpg");
-    min-height: 90%;
-}
-</style>
+
 <body>
 
 <!-- Navbar (sit on top) -->
 <div class="w3-top w3-hide-small">
   <div class="w3-bar w3-xlarge w3-black w3-opacity w3-hover-opacity-off" id="myNavbar">
-    <a href="#title" class="w3-bar-item w3-button">Title</a>
+    <a href="#title" class="w3-bar-item w3-button">^ Top</a>
     <a href="#sched" class="w3-bar-item w3-button">Train Schedule</a>
     <a href="#add" class="w3-bar-item w3-button">Add Train</a>
   </div>
@@ -38,25 +30,54 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Amatic SC", sans-serif}
   </div>
   <div class="w3-display-middle w3-center">
     <h1 class="w3-text-black w3-hide-small" style="font-size:85px">Train Scheduler</h1>
-    <p><a href="#sched" class="w3-button w3-xlarge w3-black">Check train schedule</a></p>
+    <p><a href="#sched" class="w3-button w3-xlarge w3-black">Check train schedule</a></p><br/>
+    <p><a href="#add" class="w3-button w3-xlarge w3-black">Add train</a></p>
   </div>
 </header>
 
 <!-- Menu Container -->
-<div class="w3-container w3-black w3-padding-64 w3-xlarge" id="sched">
+<div class="w3-container w3-pale-red w3-padding-64 w3-xlarge" id="sched">
   <div class="w3-content">
     <h2 class="w3-center" style="margin-bottom:64px">Current Train Schedule</h2>
 
+      <table class="w3-table-all w3-card-2" id="schedTable">
+        <thead>
+          <th>Train Name</th>
+          <th>Destination</th>
+          <th>Frequency (min)</th>
+          <th>Next Arrival</th>
+          <th>Minutes Away</th>
+        </thead>
 
-    <p>[insert table]</p>
+        <tbody>
+        </tbody>
+
+      </table>
+
   </div>
 </div>
 
 <!-- About Container -->
-<div class="w3-container w3-padding-64 w3-red w3-grayscale w3-xlarge" id="add">
-  <div class="w3-content">
-    <h2 class="w3-center" style="margin-bottom:64px">Add Train</h2>
+<div class="w3-container w3-padding-64 w3-sand w3-grayscale w3-xlarge" id="add">
+  <div class="w3-content" style="max-width: 700px;">
+    <h2 class="w3-center w3-wide" style="margin-bottom:64px;">Add Train</h2>
 
+      <form>
+        <label for="trainName">Train Name</label>
+          <input class="w3-input" type="text" id="trainName" name="trainName" placeholder="e.g., Fun Train">
+
+        <label for="destination">Destination</label>
+          <input class="w3-input" type="text" id="destination" name="destination" placeholder="e.g., Barcelona">
+
+        <label for="firstTrainTime">First Train Time (HH:mm - military time)</label>
+          <input class="w3-input" type="text" id="firstTrainTime" name="firstTrainTime" placeholder="e.g., 07:30">          
+
+        <label for="frequency">Frequency (min)</label>
+          <input class="w3-input" type="text" id="frequency" name="frequency" placeholder="e.g., 10">
+
+        <button class="w3-button w3-black" type="submit">Submit</button>
+
+      </form>
     
   </div>
 </div>
@@ -69,6 +90,25 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Amatic SC", sans-serif}
 	
 
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBjKwLYqbURmFwd4WPNmvp7guWspZQrYnQ",
+    authDomain: "train-scheduler-1c532.firebaseapp.com",
+    databaseURL: "https://train-scheduler-1c532.firebaseio.com",
+    projectId: "train-scheduler-1c532",
+    storageBucket: "train-scheduler-1c532.appspot.com",
+    messagingSenderId: "347956733836"
+  };
+  firebase.initializeApp(config);
+
+
+
+
+</script>
+
 
 <!--  	<script src="assets/js/logic.js"></script>
  -->

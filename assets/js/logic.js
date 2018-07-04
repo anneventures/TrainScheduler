@@ -52,7 +52,7 @@ $("#add-train-btn").on("click", function(event) {
     var firstTrainTimeBefore = moment(firstTrainTime, "HH:mm").subtract(1, "years");    
 
     // Current Time
-    var currentTime = moment().format("HH:mm A");
+    var currentTime = moment().format("HH:mm");
       
     // Difference between the times
     var timeDiff = moment().diff(moment(firstTrainTimeBefore), "minutes");
@@ -64,7 +64,7 @@ $("#add-train-btn").on("click", function(event) {
     var minsAway = frequency - remainder;
 
     // Next Train
-    var nextTrain = moment().add(minsAway, "minutes").format("HH:mm A");
+    var nextTrain = moment().add(minsAway, "minutes").format("HH:mm");
 
     // Creates local "temporary" object for holding train data
     var newTrain = {

@@ -1,16 +1,19 @@
   // Initialize Firebase
   var config = {
     apiKey: "AIzaSyBjKwLYqbURmFwd4WPNmvp7guWspZQrYnQ",
-    authDomain: "train-scheduler-1c532.firebaseapp.com",
-    databaseURL: "https://train-scheduler-1c532.firebaseio.com",
+    authDomain: "train-scheduler-1c532.firebaseapp.com", //projectId.firebaseapp.com
+    databaseURL: "https://train-scheduler-1c532.firebaseio.com", //databaseName.firebaseio.com
     projectId: "train-scheduler-1c532",
-    storageBucket: "train-scheduler-1c532.appspot.com",
+    storageBucket: "train-scheduler-1c532.appspot.com", //bucket.appspot.com
     messagingSenderId: "347956733836"
   };
   
   firebase.initializeApp(config);
 
+//Get a reference to the database service
 var database = firebase.database();
+
+$("#currentTime").text(moment().format('HH:mm'));
 
 //Clear button for Add Train form fields
 $("#clear-train-btn").on("click", function(event) {
@@ -75,18 +78,10 @@ $("#add-train-btn").on("click", function(event) {
     };
 
     // Uploads train data to the database
-    database.ref().push(newTrain);
-
-    // Logs everything to console
-    console.log(newTrain.trainName);
-    console.log(newTrain.destination);
-    console.log(newTrain.firstTrainTime);
-    console.log(newTrain.frequency);
-    console.log(newTrain.nextTrain);
-    console.log(newTrain.minsAway);
-    console.log(newTrain.currentTime);
+    database.ref("trainData").push(newTrain);
 
     alert("New train successfully added");
+    location.reload();
 
     // Clears all of the text-boxes
     $("#train-name").val("");
@@ -98,7 +93,7 @@ $("#add-train-btn").on("click", function(event) {
 });
 
 //Create Firebase event for adding train to the database and a row in the html when a user adds an entry 
-database.ref().on("child_added", function(childSnapshot) {
+database.ref("trainData").on("child_added", function(childSnapshot) {
 
   // Store everything into a variable.
   var trainName = childSnapshot.val().trainName;
@@ -108,19 +103,13 @@ database.ref().on("child_added", function(childSnapshot) {
   var nextTrain = childSnapshot.val().nextTrain;
   var minsAway = childSnapshot.val().minsAway;
 
-  // Logs train info to console
-  console.log(trainName);
-  console.log(destination);
-  console.log(firstTrainTime);
-  console.log(frequency);
-  console.log(nextTrain);
-  console.log(minsAway);
+  var trainDataChild = childSnapshot.key;
 
   // First Time (pushed back 1 year to make sure it comes before current time)
   var firstTrainTimeBefore = moment(firstTrainTime, "HH:mm").subtract(1, "years");    
 
   // Current Time
-  var currentTime = moment().format("HH:mm A");
+  var currentTime = moment().format("HH:mm");
     
   // Difference between the times
   var timeDiff = moment().diff(moment(firstTrainTimeBefore), "minutes");
@@ -132,19 +121,36 @@ database.ref().on("child_added", function(childSnapshot) {
   var minsAway = frequency - remainder;
 
   // Next Train
-  var nextTrain = moment().add(minsAway, "minutes").format("HH:mm A");
+  var nextTrain = moment().add(minsAway, "minutes").format("HH:mm");
 
-  // Create the new row
+  // Create the new row and give each row a class with the trainData child name as its value 
   var newRow = $("<tr>").append(
     $("<td>").text(trainName),
     $("<td>").text(destination),
     $("<td>").text(frequency),    
     $("<td>").text(nextTrain),    
-    $("<td>").text(minsAway)    
+    $("<td>").text(minsAway),
+    $("<td>").html("<button class='delete' data-train='" + trainDataChild + "'><i class='glyphicon glyphicon-trash'></button>")        
   );
 
+console.log(newRow);
   // Append the new row to the table
 
   $("#schedule-table > tbody").append(newRow);
 
+
+  //Delete each existing train data
+  $(document).on("click", ".delete", function() {
+
+    var trainKey = $(this).attr("data-train");
+
+    database.ref("trainData/" + trainKey).remove();
+
+    location.reload();
+  });
+
 });
+
+
+
+

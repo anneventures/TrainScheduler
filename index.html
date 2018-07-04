@@ -3,18 +3,22 @@
 <html>
 	<head>
 		<meta charset="utf-8"/>		
-			<link href="assets/css/reset.css" rel="stylesheet">
-      <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
-			<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-      <link href="assets/css/style.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+    <title>Anne Simon | Train Scheduler</title>
 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="assets/css/reset.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link href="assets/css/style.css" rel="stylesheet">
 
-		<title>Anne Simon | Train Scheduler</title>
+    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>    
 
 <body>
 
-<!-- Navbar (sit on top) -->
+<!-- Navigation bar stays on top -->
 <div class="w3-top w3-hide-small">
   <div class="w3-bar w3-xlarge w3-black w3-opacity w3-hover-opacity-off" id="myNavbar">
     <a href="#title" class="w3-bar-item w3-button">^ Top</a>
@@ -35,12 +39,12 @@
   </div>
 </header>
 
-<!-- Menu Container -->
+<!-- Current Train Schedule table -->
 <div class="w3-container w3-pale-red w3-padding-64 w3-xlarge" id="sched">
   <div class="w3-content">
     <h2 class="w3-center" style="margin-bottom:64px">Current Train Schedule</h2>
 
-      <table class="w3-table-all w3-card-2" id="schedTable">
+      <table class="w3-table-all w3-card-2" id="schedule-table">
         <thead>
           <th>Train Name</th>
           <th>Destination</th>
@@ -57,25 +61,25 @@
   </div>
 </div>
 
-<!-- About Container -->
+<!-- Add Train form -->
 <div class="w3-container w3-padding-64 w3-sand w3-grayscale w3-xlarge" id="add">
   <div class="w3-content" style="max-width: 700px;">
     <h2 class="w3-center w3-wide" style="margin-bottom:64px;">Add Train</h2>
 
       <form>
         <label for="trainName">Train Name</label>
-          <input class="w3-input" type="text" id="trainName" name="trainName" placeholder="e.g., Fun Train">
+          <input class="w3-input" type="text" id="train-name" placeholder="e.g., Fun Train">
 
         <label for="destination">Destination</label>
-          <input class="w3-input" type="text" id="destination" name="destination" placeholder="e.g., Barcelona">
+          <input class="w3-input" type="text" id="destination" placeholder="e.g., Barcelona">
 
         <label for="firstTrainTime">First Train Time (HH:mm - military time)</label>
-          <input class="w3-input" type="text" id="firstTrainTime" name="firstTrainTime" placeholder="e.g., 07:30">          
+          <input class="w3-input" type="text" id="first-train-time" placeholder="e.g., 07:30">          
 
         <label for="frequency">Frequency (min)</label>
-          <input class="w3-input" type="text" id="frequency" name="frequency" placeholder="e.g., 10">
+          <input class="w3-input" type="text" id="frequency" placeholder="e.g., 10">
 
-        <button class="w3-button w3-black" type="submit">Submit</button>
+        <button class="w3-button w3-black" type="submit" id="add-train-btn">Submit</button>
 
       </form>
     
@@ -102,10 +106,127 @@
     storageBucket: "train-scheduler-1c532.appspot.com",
     messagingSenderId: "347956733836"
   };
+  
   firebase.initializeApp(config);
 
+//Create button for adding new train
+$("#add-train-btn").on("click", function(event) {
+
+  event.preventDefault();
+
+  // Grabs user input
+  var trainName = $("#train-name").val().trim();
+  var destination = $("#destination").val().trim();
+  var firstTrainTime = moment($("#first-train-time").val().trim(), "HH:mm").format("x");
+  var frequency = moment($("#frequency").val().trim()).format("mm");
+
+  // Add validation code using if and else if
 
 
+
+  // First Time (pushed back 1 year to make sure it comes before current time)
+  var firstTrainTimeBefore = moment(firstTrainTime, "HH:mm").subtract(1, "years");    
+
+  // Current Time
+  var currentTime = moment().format("HH:mm A");
+    
+  // Difference between the times
+  var timeDiff = moment().diff(moment(firstTrainTimeBefore), "minutes");
+
+  // Time apart (remainder)
+  var remainder = timeDiff % frequency;
+
+  // Minute Until Train
+  var minsAway = frequency - remainder;
+
+  // Next Train
+  var nextTrain = moment().add(minsAway, "minutes").format("HH:mm A");
+
+  // Creates local "temporary" object for holding train data
+  var newTrain = {
+    trainName: trainName,
+    destination: destination,
+    firstTrainTime: firstTrainTime,
+    frequency: frequency,
+    nextTrain: nextTrain,
+    minsAway: minsAway,
+    currentTime: currentTime
+  };
+
+  // Uploads train data to the database
+  database.ref().push(newTrain);
+
+  // Logs everything to console
+  console.log(newTrain.trainName);
+  console.log(newTrain.destination);
+  console.log(newTrain.firstTrainTime);
+  console.log(newTrain.frequency);
+  console.log(newTrain.nextTrain);
+  console.log(newTrain.minsAway);
+  console.log(newTrain.currentTime);
+
+  alert("New train successfully added");
+
+  // Clears all of the text-boxes
+  $("#train-name").val("");
+  $("#destination").val("");
+  $("#first-train-time").val("");
+  $("#frequency").val("");
+
+
+});
+
+//Create Firebase event for adding train to the database and a row in the html when a user adds an entry 
+database.ref().on("child_added", function(childSnapshot) {
+
+  // Store everything into a variable.
+  var trainName = childSnapshot.val().name;
+  var destination = childSnapshot.val().destination;
+  var firstTrainTime = childSnapshot.val().firstTrainTime;
+  var frequency = childSnapshot.val().frequency;
+  var nextTrain = childSnapshot.val().nextTrain;
+  var minsAway = childSnapshot.val().minsAway;
+
+  // Logs train info to console
+  console.log(trainName);
+  console.log(destination);
+  console.log(firstTrainTime);
+  console.log(frequency);
+  console.log(nextTrain);
+  console.log(minsAway);
+
+  // First Time (pushed back 1 year to make sure it comes before current time)
+  var firstTrainTimeBefore = moment(firstTrainTime, "HH:mm").subtract(1, "years");    
+
+  // Current Time
+  var currentTime = moment().format("HH:mm A");
+    
+  // Difference between the times
+  var timeDiff = moment().diff(moment(firstTrainTimeBefore), "minutes");
+
+  // Time apart (remainder)
+  var remainder = timeDiff % frequency;
+
+  // Minute Until Train
+  var minsAway = frequency - remainder;
+
+  // Next Train
+  var nextTrain = moment().add(minsAway, "minutes").format("HH:mm A");
+
+  // Create the new row
+  var newRow = $("<tr>").append(
+    $("<td>").text(trainName),
+    $("<td>").text(destination),
+    $("<td>").text(frequency),    
+    $("<td>").text(nextTrain),    
+    $("<td>").text(minsAway)    
+  );
+
+  // Append the new row to the table
+
+  $("#schedule-table > tbody").append(newRow);
+
+});
 
 </script>
 
